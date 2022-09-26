@@ -1,39 +1,42 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import ContactForm from '../ContactsForm/ContactsForm';
 import ContactsList from '../ContactsList/ContactsList';
 import Filter from '../Filter/Filter';
 import { ContainerApp, Title, Subtitle } from './AppStyled';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  }
+const App = () => {
 
-componentDidMount() {
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = localStorage.getItem('contacts');
+    return savedContacts ? savedContacts : []});
+  const [filter, setFilter] = useState('');
 
-  const contacts = localStorage.getItem('contacts');
-  const parsedContactsList = JSON.parse(contacts);
+// componentDidMount() {
 
-  if(parsedContactsList) {
-    this.setState({ contacts: parsedContactsList });
-  }
-}
+//   const contacts = localStorage.getItem('contacts');
+//   const parsedContactsList = JSON.parse(contacts);
+
+//   if(parsedContactsList) {
+//     this.setState({ contacts: parsedContactsList });
+//   }
+// }
 
 
-componentDidUpdate(_, prevState) {
-  const nextContacts = this.state.contacts;
-  const prevContacts = prevState.contacts;
+// componentDidUpdate(_, prevState) {
+//   const nextContacts = this.state.contacts;
+//   const prevContacts = prevState.contacts;
 
-  if(nextContacts !== prevContacts) {
-    localStorage.setItem('contacts', JSON.stringify(nextContacts))
-  }
-}
+//   if(nextContacts !== prevContacts) {
+//     localStorage.setItem('contacts', JSON.stringify(nextContacts))
+//   }
+// }
 
-  addContact = (data) => {
-    if(this.duplicateName(data)) {
-      return alert(`${data.name} is already in contacts!`)
+  const addContact = (data) => {
+    if(duplicateName(data)) {
+      return toast.error(`${data.name} is already in contacts!`)
     }
 
     const contact = {
@@ -42,66 +45,62 @@ componentDidUpdate(_, prevState) {
       number: data.number,
     }
    
-    this.setState(prevState => ({
-      contacts: [contact, ...prevState.contacts],
-    }))
+    setContacts(prevState => [contact, ...prevState]);
   }
 
-  removeContact = (id) => {
-    this.setState((prevState) => {
-        const updateContacts = prevState.contacts.filter((contact) => contact.id !== id);
-
-        return {
-            contacts: updateContacts
-        }
-    })
+  const removeContact = (id) => {
+    setContacts(prevState => prevState.filter((contact) => contact.id !== id));
   }
 
-  filterNamesContacts = e => {
-    this.setState({ filter: e.currentTarget.value });
+  const filterNamesContacts = e => {
+     setFilter(e.currentTarget.value);
   };
 
-  getFilteredContacts = () => {
-    const { filter, contacts } = this.state;
+  const getFilteredContacts = () => {
  
     if(!filter) {
       return contacts;
     }
     const normalizedFilter = filter.toLocaleLowerCase();
-    const filteredContacts = contacts.filter(({ name }) => {
+
+    const filteredContacts = contacts.filter(({name}) => {
       const normalizedName = name.toLocaleLowerCase();
       return normalizedName.includes(normalizedFilter);
     })
+
     return filteredContacts;
     
   };
 
-  duplicateName({name}) {
-    const { contacts } = this.state;
+  const duplicateName = ({name}) => {
     return contacts.find((contact) => contact.name === name);
   }
 
- render() {
+
   return (
     <ContainerApp>
       <Title>Phonebook</Title>
-      <ContactForm onSubmit={this.addContact}/>
+      <ContactForm onSubmit={addContact}/>
 
       <Subtitle>Contacts</Subtitle>
 
       <Filter 
-        value={this.state.filter} 
-        onChange={this.filterNamesContacts}
+        value={filter} 
+        onChange={filterNamesContacts}
       />
 
       <ContactsList 
-        contacts={this.getFilteredContacts()} 
-        removeContact={this.removeContact}
+        contacts={getFilteredContacts()} 
+        removeContact={removeContact}
+      />
+
+      <ToastContainer 
+        autoClose={3000} 
+        theme={'colored'}
       />
 
     </ContainerApp>
   )
 };
-}
 
 export default App;
