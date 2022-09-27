@@ -10,29 +10,15 @@ import 'react-toastify/dist/ReactToastify.css';
 const App = () => {
 
   const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem('contacts');
-    return savedContacts ? savedContacts : []});
+    const savedContacts = JSON.parse(localStorage.getItem('contacts'));
+    return savedContacts ?? []
+  });
+  
   const [filter, setFilter] = useState('');
 
-// componentDidMount() {
-
-//   const contacts = localStorage.getItem('contacts');
-//   const parsedContactsList = JSON.parse(contacts);
-
-//   if(parsedContactsList) {
-//     this.setState({ contacts: parsedContactsList });
-//   }
-// }
-
-
-// componentDidUpdate(_, prevState) {
-//   const nextContacts = this.state.contacts;
-//   const prevContacts = prevState.contacts;
-
-//   if(nextContacts !== prevContacts) {
-//     localStorage.setItem('contacts', JSON.stringify(nextContacts))
-//   }
-// }
+  useEffect(() => {
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts])
 
   const addContact = (data) => {
     if(duplicateName(data)) {
@@ -46,14 +32,14 @@ const App = () => {
     }
    
     setContacts(prevState => [contact, ...prevState]);
-  }
+  };
 
   const removeContact = (id) => {
     setContacts(prevState => prevState.filter((contact) => contact.id !== id));
-  }
+  };
 
   const filterNamesContacts = e => {
-     setFilter(e.currentTarget.value);
+    setFilter(e.currentTarget.value);
   };
 
   const getFilteredContacts = () => {
@@ -61,9 +47,10 @@ const App = () => {
     if(!filter) {
       return contacts;
     }
+
     const normalizedFilter = filter.toLocaleLowerCase();
 
-    const filteredContacts = contacts.filter(({name}) => {
+    const filteredContacts = contacts.filter(({ name }) => {
       const normalizedName = name.toLocaleLowerCase();
       return normalizedName.includes(normalizedFilter);
     })
@@ -72,15 +59,16 @@ const App = () => {
     
   };
 
-  const duplicateName = ({name}) => {
+  const duplicateName = ({ name }) => {
     return contacts.find((contact) => contact.name === name);
-  }
-
+  };
 
   return (
     <ContainerApp>
       <Title>Phonebook</Title>
-      <ContactForm onSubmit={addContact}/>
+      <ContactForm 
+        onSubmit={addContact}
+      />
 
       <Subtitle>Contacts</Subtitle>
 
