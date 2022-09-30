@@ -9,10 +9,9 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
 
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = JSON.parse(localStorage.getItem('contacts'));
-    return savedContacts ?? []
-  });
+  const [contacts, setContacts] = useState(
+    JSON.parse(localStorage.getItem('contacts')) ?? []
+  );
   
   const [filter, setFilter] = useState('');
 
